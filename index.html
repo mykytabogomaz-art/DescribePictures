@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8"/>
+  <title>Describe the Picture</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: #2980b9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+    .quiz-card { background-color: #f4f7f6; border-radius: 16px; padding: 24px; width: 100%; max-width: 640px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .back-btn { text-decoration: none; color: #2980b9; font-weight: bold; background: #fff; padding: 8px 14px; border-radius: 8px; border: 2px solid #2980b9; }
+    .header-title { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 15px; }
+    .photo-frame { background: #fff; border-radius: 12px; border: 4px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin-bottom: 20px; overflow: hidden; }
+    .photo-frame img { display: block; width: 100%; height: 300px; object-fit: cover; }
+    .selects-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .select-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 10px; padding: 8px 12px; border: 2px solid #ecf0f1; }
+    .select-label { font-weight: bold; color: #2c3e50; font-size: 16px; white-space: nowrap; text-align: left; flex: 1; }
+    .answer-select { flex: 1.2; padding: 9px 12px; font-size: 15px; font-weight: bold; color: #2c3e50; border: 2px solid #bdc3c7; border-radius: 8px; background: #fff; cursor: pointer; transition: all 0.2s; }
+    .answer-select:hover { border-color: #2980b9; }
+    .answer-select.correct { border-color: #27ae60; background-color: #e8f8f0; color: #1e8449; }
+    .answer-select.wrong { border-color: #e74c3c; background-color: #fdedec; color: #c0392b; }
+    .action-btn { background-color: #ff9800; color: white; border: none; border-radius: 10px; padding: 12px 28px; font-size: 17px; font-weight: bold; cursor: pointer; }
+    .action-btn:disabled { background-color: #d5d8dc; color: #999; cursor: not-allowed; }
+    .feedback { margin-top: 12px; font-size: 17px; font-weight: bold; min-height: 25px; }
+    .feedback.correct { color: #27ae60; } .feedback.incorrect { color: #e74c3c; }
+    .progress { font-size: 14px; color: #7f8c8d; font-weight: bold; }
+  </style>
+<script src="https://www.kimi.com/sdk-seed.js" defer="" data-kimi-disable-watermark="false" data-kimi-analytics="true" data-kimi-website-id="1a0feddd-89b2-8d77-8000-00005e237081" data-kimi-website-env="published"></script></head>
+<body>
+  <div class="quiz-card">
+    <div class="top-bar">
+      <a class="back-btn" href="index.html">⬅ Menu</a>
+      <div class="progress" id="progress">Photo 1 of 15</div>
+    </div>
+    <div class="header-title">Describe the Picture</div>
+    <div class="photo-frame"><img id="photo" src="" alt="picture" style="width: 50%; height: auto;"/></div>
+    <div class="selects-container" id="selects-container"></div>
+    <button class="action-btn" id="check-btn" onclick="checkAnswers()">Check</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        "img": "img/01_cat.png",
+        "selects": [
+          { "label": "This is a", "options": ["cat", "dog", "fish"], "correct": 0 },
+          { "label": "It is", "options": ["grey", "red", "blue"], "correct": 0 },
+          { "label": "It is", "options": ["small", "big", "tall"], "correct": 0 },
+          { "label": "It can", "options": ["run", "fly", "swim"], "correct": 0 },
+          { "label": "It says", "options": ["«meow»", "«woof»", "«moo»"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/02_dog.png",
+        "selects": [
+          { "label": "This is a", "options": ["dog", "cat", "bird"], "correct": 0 },
+          { "label": "It is", "options": ["brown", "green", "purple"], "correct": 0 },
+          { "label": "It is", "options": ["big", "tiny", "short"], "correct": 0 },
+          { "label": "It can", "options": ["run", "fly", "read"], "correct": 0 },
+          { "label": "It says", "options": ["«woof»", "«meow»", "«quack»"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/03_apple.png",
+        "selects": [
+          { "label": "This is an", "options": ["apple", "egg", "ball"], "correct": 0 },
+          { "label": "It is", "options": ["red", "blue", "black"], "correct": 0 },
+          { "label": "It is", "options": ["round", "square", "long"], "correct": 0 },
+          { "label": "It is", "options": ["sweet", "salty", "bitter"], "correct": 0 },
+          { "label": "It grows on a", "options": ["tree", "bus", "house"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/04_car.png",
+        "selects": [
+          { "label": "This is a", "options": ["car", "bus", "bike"], "correct": 0 },
+          { "label": "It is", "options": ["blue", "yellow", "pink"], "correct": 0 },
+          { "label": "It is", "options": ["fast", "slow", "sleepy"], "correct": 0 },
+          { "label": "It has four", "options": ["wheels", "legs", "wings"], "correct": 0 },
+          { "label": "It can", "options": ["drive", "fly", "swim"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/05_bird.png",
+        "selects": [
+          { "label": "This is a", "options": ["bird", "fish", "cat"], "correct": 0 },
+          { "label": "It is", "options": ["yellow", "grey", "black"], "correct": 0 },
+          { "label": "It has two", "options": ["wings", "hands", "wheels"], "correct": 0 },
+          { "label": "It can", "options": ["fly", "drive", "read"], "correct": 0 },
+          { "label": "It lives in a", "options": ["nest", "house", "box"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/06_fish.png",
+        "selects": [
+          { "label": "This is a", "options": ["fish", "frog", "bird"], "correct": 0 },
+          { "label": "It is", "options": ["orange", "green", "purple"], "correct": 0 },
+          { "label": "It can", "options": ["swim", "run", "fly"], "correct": 0 },
+          { "label": "It lives in", "options": ["water", "a tree", "a house"], "correct": 0 },
+          { "label": "It has no", "options": ["legs", "fins", "tail"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/07_house.png",
+        "selects": [
+          { "label": "This is a", "options": ["house", "tree", "car"], "correct": 0 },
+          { "label": "It is", "options": ["big", "small", "tiny"], "correct": 0 },
+          { "label": "The roof is", "options": ["red", "blue", "green"], "correct": 0 },
+          { "label": "It has many", "options": ["windows", "wheels", "wings"], "correct": 0 },
+          { "label": "We", "options": ["live in it", "drive it", "eat it"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/08_tree.png",
+        "selects": [
+          { "label": "This is a", "options": ["tree", "flower", "house"], "correct": 0 },
+          { "label": "It is", "options": ["green", "red", "blue"], "correct": 0 },
+          { "label": "It is", "options": ["tall", "short", "tiny"], "correct": 0 },
+          { "label": "It has many", "options": ["leaves", "wheels", "windows"], "correct": 0 },
+          { "label": "It grows in the", "options": ["park", "water", "sky"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/09_flower.png",
+        "selects": [
+          { "label": "This is a", "options": ["flower", "tree", "car"], "correct": 0 },
+          { "label": "It is", "options": ["pink", "grey", "brown"], "correct": 0 },
+          { "label": "It is", "options": ["beautiful", "angry", "hungry"], "correct": 0 },
+          { "label": "It smells", "options": ["nice", "bad", "loud"], "correct": 0 },
+          { "label": "It grows in the", "options": ["garden", "sky", "water"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/10_ball.png",
+        "selects": [
+          { "label": "This is a", "options": ["ball", "box", "book"], "correct": 0 },
+          { "label": "It is", "options": ["round", "square", "long"], "correct": 0 },
+          { "label": "It is", "options": ["colorful", "grey", "black"], "correct": 0 },
+          { "label": "It can", "options": ["bounce", "fly", "swim"], "correct": 0 },
+          { "label": "We", "options": ["play with it", "eat it", "read it"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/11_elephant.png",
+        "selects": [
+          { "label": "This is an", "options": ["elephant", "mouse", "cat"], "correct": 0 },
+          { "label": "It is", "options": ["grey", "green", "pink"], "correct": 0 },
+          { "label": "It is", "options": ["big", "small", "tiny"], "correct": 0 },
+          { "label": "It has a long", "options": ["trunk", "neck", "tail"], "correct": 0 },
+          { "label": "It lives on the", "options": ["savanna", "moon", "sea"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/12_cake.png",
+        "selects": [
+          { "label": "This is a", "options": ["cake", "soup", "salad"], "correct": 0 },
+          { "label": "It is", "options": ["sweet", "salty", "bitter"], "correct": 0 },
+          { "label": "It has", "options": ["candles", "wheels", "leaves"], "correct": 0 },
+          { "label": "We", "options": ["eat it", "drive it", "wear it"], "correct": 0 },
+          { "label": "We eat it at a", "options": ["party", "school", "park"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/13_bus.png",
+        "selects": [
+          { "label": "This is a", "options": ["bus", "car", "train"], "correct": 0 },
+          { "label": "It is", "options": ["yellow", "purple", "black"], "correct": 0 },
+          { "label": "It is", "options": ["long", "round", "small"], "correct": 0 },
+          { "label": "It carries many", "options": ["people", "fish", "birds"], "correct": 0 },
+          { "label": "It can", "options": ["drive", "fly", "swim"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/14_book.png",
+        "selects": [
+          { "label": "This is a", "options": ["book", "ball", "box"], "correct": 0 },
+          { "label": "It has many", "options": ["pages", "wheels", "wings"], "correct": 0 },
+          { "label": "We", "options": ["read it", "eat it", "drive it"], "correct": 0 },
+          { "label": "It is", "options": ["interesting", "tasty", "soft"], "correct": 0 },
+          { "label": "It can", "options": ["teach us", "feed us", "carry us"], "correct": 0 }
+        ]
+      },
+      {
+        "img": "img/15_sun.png",
+        "selects": [
+          { "label": "This is the", "options": ["sun", "moon", "star"], "correct": 0 },
+          { "label": "It is", "options": ["yellow", "blue", "black"], "correct": 0 },
+          { "label": "It is", "options": ["round", "square", "long"], "correct": 0 },
+          { "label": "It is", "options": ["hot", "cold", "wet"], "correct": 0 },
+          { "label": "It shines in the", "options": ["sky", "water", "box"], "correct": 0 }
+        ]
+      }
+    ];
+
+    let currentTask = 0;
+    let firstTryCount = 0;
+    let hadMistake = false;
+    const selectEls = [];
+
+    function loadTask() {
+      const task = quizData[currentTask];
+      hadMistake = false;
+      document.getElementById('progress').innerText = `Photo ${currentTask + 1} of ${quizData.length}`;
+      const photo = document.getElementById('photo');
+      photo.src = task.img;
+      document.getElementById('feedback').innerText = "";
+      document.getElementById('feedback').className = "feedback";
+      const checkBtn = document.getElementById('check-btn');
+      checkBtn.innerText = "Check"; checkBtn.onclick = checkAnswers; checkBtn.disabled = true;
+
+      const container = document.getElementById('selects-container');
+      container.innerHTML = '';
+      selectEls.length = 0;
+      task.selects.forEach((sel) => {
+        const row = document.createElement('div');
+        row.className = 'select-row';
+        const label = document.createElement('span');
+        label.className = 'select-label';
+        label.innerText = sel.label + ' …';
+        const select = document.createElement('select');
+        select.className = 'answer-select';
+        const placeholder = document.createElement('option');
+        placeholder.value = ""; placeholder.innerText = "— choose —";
+        placeholder.disabled = true; placeholder.selected = true;
+        select.appendChild(placeholder);
+        sel.options.forEach((optText, i) => {
+          const opt = document.createElement('option');
+          opt.value = i; opt.innerText = optText;
+          select.appendChild(opt);
+        });
+        select.onchange = () => {
+          select.classList.remove('wrong');
+          document.getElementById('check-btn').disabled = !allAnswered();
+        };
+        row.appendChild(label); row.appendChild(select);
+        container.appendChild(row);
+        selectEls.push(select);
+      });
+    }
+
+    function allAnswered() {
+      return selectEls.every(s => s.value !== "");
+    }
+
+    function checkAnswers() {
+      const task = quizData[currentTask];
+      const feedback = document.getElementById('feedback');
+      const checkBtn = document.getElementById('check-btn');
+      let allCorrect = true;
+      selectEls.forEach((select, i) => {
+        if (parseInt(select.value) === task.selects[i].correct) {
+          select.classList.remove('wrong');
+          select.classList.add('correct');
+          select.disabled = true;
+        } else {
+          select.classList.remove('correct');
+          select.classList.add('wrong');
+          allCorrect = false;
+        }
+      });
+      if (allCorrect) {
+        if (!hadMistake) firstTryCount++;
+        feedback.innerText = "Correct! Great job! 🌟";
+        feedback.className = "feedback correct";
+        if (currentTask < quizData.length - 1) {
+          checkBtn.innerText = "Next ▶"; checkBtn.onclick = nextTask;
+        } else {
+          checkBtn.innerText = "Finish"; checkBtn.onclick = finishQuiz;
+        }
+      } else {
+        hadMistake = true;
+        feedback.innerText = "Look at the red answers and try again!";
+        feedback.className = "feedback incorrect";
+        checkBtn.disabled = true;
+        selectEls.forEach((select) => {
+          if (select.classList.contains('wrong')) select.value = "";
+        });
+      }
+    }
+
+    function nextTask() { currentTask++; loadTask(); }
+
+    function finishQuiz() {
+      document.querySelector('.quiz-card').innerHTML = `
+        <h2 style="color: #2980b9; font-size: 26px;">Great work! 🎉</h2>
+        <p style="font-size: 17px;">You described all 15 pictures!</p>
+        <p style="font-size: 17px; margin-bottom: 20px;">Perfect on the first try: <b>${firstTryCount} of 15</b> ⭐</p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <a href="index.html" class="action-btn" style="text-decoration:none; background:#34495e;">To menu</a>
+          <button class="action-btn" onclick="location.reload()">Play again</button>
+        </div>`;
+    }
+
+    loadTask();
+  </script>
+
+
+</body></html>
